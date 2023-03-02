@@ -47,19 +47,33 @@
   	{{ .Page.Scratch.Set "galleryLoaded" true }}
 	<!-- Use relURL to support hugo projects that run in a subdirectory (bug #18) -->
 
+	{{ $js := slice }}
+
 	{{ if $loadJQuery }}
-		<script src="{{ "shortcode-gallery/jquery-3.7.1.min.js" | relURL }}"></script>
+		{{ $js = $js | append "shortcode-gallery/jquery-3.7.1.min.js" }}
 	{{ end }}
-	
+
 	{{ if not (eq $previewType "none") }}
-		<script src="{{ "shortcode-gallery/lazy/jquery.lazy.min.js" | relURL }}"></script>
+		{{ $js = $js | append "shortcode-gallery/lazy/jquery.lazy.min.js" }}
 	{{ end }}
 
-	<script src="{{ "shortcode-gallery/swipebox/js/jquery.swipebox.min.js" | relURL }}"></script>
-	<link rel="stylesheet" href="{{ "shortcode-gallery/swipebox/css/swipebox.min.css"| relURL }}">
+	{{ $js = $js | append "shortcode-gallery/swipebox/js/jquery.swipebox.min.js" }}
+	{{ $js = $js | append "shortcode-gallery/justified_gallery/jquery.justifiedGallery.min.js"}}
 
-	<script src="{{ "shortcode-gallery/justified_gallery/jquery.justifiedGallery.min.js"| relURL }}"></script>
-	<link rel="stylesheet" href="{{ "shortcode-gallery/justified_gallery/justifiedGallery.min.css"| relURL }}"/>
+	{{ range $js }}
+		{{ $innerjs := resources.Get . }}
+        {{ $secureJS := $innerjs | resources.Fingerprint "sha256" }}
+		<script src="{{ $secureJS.Permalink }}" integrity="{{ $secureJS.Data.Integrity }}"></script>
+	{{ end }}
+
+	{{ $css := slice "shortcode-gallery/swipebox/css/swipebox.min.css" }}
+	{{ $css = $css | append "shortcode-gallery/justified_gallery/justifiedGallery.min.css" }}
+
+	{{ range $css }}
+		{{ $innercss := resources.Get . }}
+		{{ $secureCSS := $innercss | resources.Fingerprint "sha256" }}
+		<link rel="stylesheet" href="{{ $secureCSS.Permalink }}" integrity="{{ $secureCSS.Data.Integrity }}">
+	{{ end }}
 {{ end }}
 
 <style>
